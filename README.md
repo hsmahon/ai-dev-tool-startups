@@ -15,7 +15,7 @@ A curated tracker of AI developer tool companies, modeled after the inference co
 
 ## Companies included
 
-LangChain · Factory.ai · Databricks · GitHub · GitLab · Stainless · Mintlify · Artificial Analysis · OpenRouter · OpenCode
+LangChain · Factory.ai · Databricks · GitHub · GitLab · Stainless · Mintlify · Artificial Analysis · OpenRouter · OpenCode · Weights & Biases
 
 ## Notes
 
