@@ -355,12 +355,12 @@
         <table id="devToolsTable">
           <thead>
             <tr>
-              <th data-col="0" data-type="alpha">Company <span class="sort-arrow">↕</span></th>
+              <th>Company</th>
               <th data-col="1" data-type="num">Headcount <span class="sort-arrow">↕</span></th>
               <th data-col="2" data-type="tier">Funding Round <span class="sort-arrow">↕</span></th>
               <th data-col="3" data-type="money">Amount Raised <span class="sort-arrow">↕</span></th>
-              <th data-col="4" data-type="alpha">Careers Page <span class="sort-arrow">↕</span></th>
-              <th data-col="5" data-type="alpha">Sources <span class="sort-arrow">↕</span></th>
+              <th>Careers Page</th>
+              <th>Sources</th>
             </tr>
           </thead>
                     <tbody>
@@ -539,6 +539,14 @@
       const countEl = document.getElementById("companyCount");
       if (countEl) countEl.textContent = tbody.rows.length + " companies tracked";
 
+      Array.from(tbody.rows).forEach((row) => {
+        const headcountCell = row.cells[1];
+        const rawHeadcount = Number(headcountCell?.dataset.val);
+        if (headcountCell && Number.isFinite(rawHeadcount)) {
+          headcountCell.textContent = rawHeadcount.toLocaleString("en-US");
+        }
+      });
+
       /* ── Sorting ─────────────────────────────────────────────── */
       const TIER = { seed: 0, a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10, public: 11, strategic: 12, other: 13 };
 
@@ -563,14 +571,14 @@
 
       let sortCol = -1, sortAsc = true;
 
-      document.querySelectorAll("#devToolsTable thead th").forEach((th) => {
+      document.querySelectorAll("#devToolsTable thead th[data-col]").forEach((th) => {
         th.addEventListener("click", () => {
           const col  = parseInt(th.dataset.col, 10);
           const type = th.dataset.type;
           sortAsc = sortCol === col ? !sortAsc : true;
           sortCol = col;
 
-          document.querySelectorAll("#devToolsTable thead th").forEach((h) => {
+          document.querySelectorAll("#devToolsTable thead th[data-col]").forEach((h) => {
             h.classList.remove("sort-asc", "sort-desc");
             h.querySelector(".sort-arrow").textContent = "↕";
           });
