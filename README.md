@@ -2,6 +2,8 @@
 
 A curated tracker of AI developer tool companies.
 
+**Live page:** https://hsmahon.github.io/ai-dev-tool-startups/
+
 ## What's tracked
 
 | Field | Description |
