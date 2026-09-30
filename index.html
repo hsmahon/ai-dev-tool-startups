@@ -14,9 +14,9 @@
       --bg-0:        #110a06;
       --bg-hero:     rgba(31, 18, 10, 0.95);
       --bg-table:    rgba(25, 15, 9, 0.93);
-      --bg-row-odd:  rgba(35, 20, 11, 0.7);
-      --bg-row-even: rgba(23, 14, 8, 0.74);
-      --bg-row-hover:rgba(55, 30, 13, 0.9);
+      --bg-row-odd:  rgba(56, 33, 18, 0.55);
+      --bg-row-even: rgba(24, 14, 8, 0.45);
+      --bg-row-hover:rgba(88, 52, 24, 0.75);
       --bg-head:     linear-gradient(180deg, #4d2a14 0%, #351b0c 100%);
       --border:      #8a4e1f;
       --line:        #6f3d19;
@@ -157,7 +157,7 @@
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      min-width: 860px;
+      min-width: 900px;
     }
 
     th, td {
@@ -166,7 +166,8 @@
       padding: 11px 13px;
       text-align: left;
       vertical-align: top;
-      font-size: .92rem;
+      font-family: var(--font-sans);
+      font-size: .88rem;
     }
 
     th:last-child, td:last-child { border-right: 0; }
@@ -189,6 +190,9 @@
     }
 
     th:hover { color: #fff; }
+
+    /* Numeric headers sit over their right-aligned figures */
+    th[data-col="1"], th[data-col="3"] { text-align: right; }
 
     /* Sort arrow */
     th .sort-arrow {
@@ -249,8 +253,18 @@
     /* ── Amount raised cell ────────────────────────────────────── */
     .amount {
       font-family: var(--font-sans);
-      font-weight: 600;
-      color: #ffcd95;
+      font-weight: 700;
+      color: #ffd9a8;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    /* ── Numeric gutter: a scannable column of comparable figures ─ */
+    td[data-label="Headcount"],
+    td[data-label="Amount Raised"] {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
       white-space: nowrap;
     }
 
@@ -310,6 +324,10 @@
         display: flex;
         gap: 8px;
       }
+
+      /* Right-aligned figures would fight the label/card layout */
+      td[data-label="Headcount"],
+      td[data-label="Amount Raised"] { text-align: left; }
 
       td::before {
         content: attr(data-label);
@@ -625,32 +643,45 @@
         return raw.toLowerCase();
       }
 
-      let sortCol = -1, sortAsc = true;
+      /* Page opens ranked by Amount Raised, highest first */
+      const DEFAULT_COL = 3;
+      let sortCol = DEFAULT_COL, sortAsc = false;
 
-      document.querySelectorAll("#devToolsTable thead th[data-col]").forEach((th) => {
+      const sortableHeaders = document.querySelectorAll("#devToolsTable thead th[data-col]");
+
+      function applySort(col, type, asc) {
+        sortAsc = asc;
+
+        sortableHeaders.forEach((h) => {
+          h.classList.remove("sort-asc", "sort-desc");
+          h.querySelector(".sort-arrow").textContent = "↕";
+        });
+
+        const active = sortableHeaders[[...sortableHeaders].findIndex((h) => parseInt(h.dataset.col, 10) === col)];
+        if (active) {
+          active.classList.add(sortAsc ? "sort-asc" : "sort-desc");
+          active.querySelector(".sort-arrow").textContent = sortAsc ? "↑" : "↓";
+        }
+
+        const rows = Array.from(tbody.rows);
+        rows.sort((a, b) => {
+          const va = cellValue(a, col, type);
+          const vb = cellValue(b, col, type);
+          const cmp = typeof va === "number" ? va - vb : va.localeCompare(vb);
+          return sortAsc ? cmp : -cmp;
+        });
+        rows.forEach((r) => tbody.appendChild(r));
+      }
+
+      sortableHeaders.forEach((th) => {
         th.addEventListener("click", () => {
           const col  = parseInt(th.dataset.col, 10);
-          const type = th.dataset.type;
-          sortAsc = sortCol === col ? !sortAsc : true;
+          applySort(col, th.dataset.type, sortCol === col ? !sortAsc : true);
           sortCol = col;
-
-          document.querySelectorAll("#devToolsTable thead th[data-col]").forEach((h) => {
-            h.classList.remove("sort-asc", "sort-desc");
-            h.querySelector(".sort-arrow").textContent = "↕";
-          });
-          th.classList.add(sortAsc ? "sort-asc" : "sort-desc");
-          th.querySelector(".sort-arrow").textContent = sortAsc ? "↑" : "↓";
-
-          const rows = Array.from(tbody.rows);
-          rows.sort((a, b) => {
-            const va = cellValue(a, col, type);
-            const vb = cellValue(b, col, type);
-            const cmp = typeof va === "number" ? va - vb : va.localeCompare(vb);
-            return sortAsc ? cmp : -cmp;
-          });
-          rows.forEach((r) => tbody.appendChild(r));
         });
       });
+
+      applySort(DEFAULT_COL, "money", false);
     })();
   </script>
 </body>
